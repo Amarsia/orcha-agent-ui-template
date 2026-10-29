@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "slug": "orcha-agent-ui",
+  "name": "Agent UI",
+  "description": "A production-ready OrchaJS agent workspace with streaming, durable sessions, execution traces, and client actions.",
+  "repository": "Amarsia/orcha-agent-ui-template",
+  "framework": "nextjs",
+  "category": "agent",
+  "agent": {
+    "entrypoint": "orcha/index.ts",
+    "defaultAgent": "assistant"
+  },
+  "environment": {
+    "required": [
+      { "key": "OPENAI_API_KEY", "label": "OpenAI API key", "secret": true }
+    ],
+    "optional": [
+      { "key": "AMARSIA_PROJECT_KEY", "label": "Amarsia project key", "secret": true }
+    ]
+  },
+  "deployment": {
+    "type": "container",
+    "port": 3000,
+    "persistentStorage": { "path": "/data/sessions", "required": true }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Atlas",
+  "description": "A practical planning agent that explains its work and uses actions when useful.",
+  "provider": "openai",
+  "model": "gpt-5-mini",
+  "region": "provider_managed",
+  "maxTokens": 4096,
+  "outputType": "text"
+}

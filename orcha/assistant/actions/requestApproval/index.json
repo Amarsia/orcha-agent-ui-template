@@ -1,0 +1,23 @@
+{
+  "name": "request_approval",
+  "description": "Ask the user to approve or decline a proposed next step.",
+  "execution": "client",
+  "sideEffect": false,
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "maxLength": 120 },
+      "summary": { "type": "string", "maxLength": 1000 }
+    },
+    "required": ["title", "summary"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "approved": { "type": "boolean" },
+      "note": { "type": "string" }
+    },
+    "required": ["approved"]
+  }
+}
