@@ -1,149 +1,159 @@
 # Orcha Agent UI Template
 
-A compact, technical workspace for learning how to build and run durable AI
-agents with [OrchaJS](https://github.com/Amarsia/orcha). Use it as a starter
-application, a reference implementation, or a hands-on tutorial.
+A full-stack Next.js workspace for building, running, and inspecting durable AI agents and subagents with **[OrchaJS](https://github.com/Amarsia/orcha)** ([`orchajs` on npm](https://www.npmjs.com/package/orchajs)). Use it as a production starter or a hands-on reference for multi-step agent execution, subagent delegation, client-side approvals, and multimodal file input.
 
-The template runs Orcha directly inside a Next.js server. The browser receives
-streaming execution snapshots while Orcha owns model calls, actions, durable
-history, client-action pauses, and resumptions.
+![Orcha Agent UI Workspace](docs/preview.png)
 
-## What is included
+## Links
 
-- On-demand agent runs with cumulative streaming output
-- Durable per-browser run history and deep links
-- Compact execution states for thinking, writing, actions, subagents, and completion
-- Rich GitHub-flavored Markdown when the model returns Markdown
-- Image and document input from the composer
-- Local actions with JSON Schema inputs and validated outputs
-- A client-side approval action that pauses and safely resumes a run
-- Responsive light, dark, and system themes
-- Amarsia inference and cloud storage, or direct provider credentials
+- **OrchaJS GitHub**: [github.com/Amarsia/orcha](https://github.com/Amarsia/orcha)
+- **OrchaJS npm package**: [npmjs.com/package/orchajs](https://www.npmjs.com/package/orchajs)
 
-The example `Atlas` agent includes:
+---
 
-- `create_checklist` — normalize a concrete execution plan
-- `prioritize_tasks` — rank work using impact, urgency, and effort
-- `build_risk_register` — score and order operational risks
-- `calculate_metrics` — calculate numeric summaries without model arithmetic
-- `request_approval` — pause for an explicit browser-side decision
+## What's Included
 
-## Start locally
+- **On-demand agent workspace** — Streaming NDJSON runs, collapsible sidebar, durable per-browser session history, and deep-linked sessions (`/?session=...`).
+- **Subagent delegation & inspector** — `Atlas` can delegate research tasks to the `researcher` subagent (`orcha/researcher/`) and lets you drill into the child session's full event timeline with breadcrumb navigation.
+- **Interactive client actions** — `request_approval` pauses the durable run (`waiting_for_client_action`), renders an inline approval form in the UI, and resumes the exact paused run once resolved.
+- **Built-in local actions** — Validated JSON Schema tools under `orcha/assistant/actions/` (`create_checklist`, `prioritize_tasks`, `build_risk_register`, `calculate_metrics`).
+- **Image & document uploads** — Attach images, PDFs, Markdown, CSV, JSON, Word, or Excel files from the composer with inline image thumbnails and visitor-scoped serving (`/api/uploads/[fileId]`).
+- **Rich Markdown + compact step trace** — Renders GitHub-flavored Markdown alongside expandable steps for reasoning, tool calls (`Input` / `Output` / duration), skills, evaluations, and subagent runs.
+- **Light, Cursor-style dark, and system themes** — Controlled via `next-themes` and `app/globals.css`.
 
-Requirements: Node.js 20.9 or newer.
+---
+
+## How the Orcha-Powered Design Works
+
+1. **Filesystem-convention agents (`orcha/`)**
+   - `orcha/index.ts` initializes OrchaJS with **Amarsia AI Gateway** + cloud session storage when `AMARSIA_PROJECT_KEY` is set, or direct provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `DEEPSEEK_API_KEY`) as fallback.
+   - `orcha/assistant/` defines the primary `Atlas` agent (`index.json`, `instructions.md`, `actions/`, and `tests/`).
+   - `orcha/researcher/` defines a private subagent registered under `assistant.subagents`.
+2. **Server-side execution (`app/api/executions/route.ts`)**
+   - Resolves the private `HttpOnly` visitor identity cookie (`lib/visitor.ts`).
+   - Converts uploaded attachment IDs into Orcha file content items (`{ type: "file", filePath, mimeType }`).
+   - Calls `assistant.run(...)` for new sessions or `assistant.resume(sessionId, ...)` for follow-up turns, streaming snapshots and canonical events over NDJSON.
+3. **Subagent & approval lifecycle (`app/api/sessions/`)**
+   - `/api/sessions/[sessionId]/subagents/[childSessionId]` verifies parent lineage via `assistant.subagentEvents(childSessionId)`.
+   - `/api/sessions/[sessionId]/tools/[callId]` submits client-action results back into `assistant.resume(sessionId, { toolResults })`.
+
+---
+
+## Quick Start
+
+Requirements: **Node.js 20.9 or newer**.
+
+### 1. Install dependencies & create `.env`
 
 ```bash
 npm install
 cp .env.example .env
-npm run dev
 ```
 
-Open `http://localhost:3000`.
+### 2. Configure credentials
 
-### Option 1: Amarsia inference
+Choose either **Amarsia AI Gateway** (fastest setup — includes free credits, unified routing across providers, and cloud session storage) or **your own model provider keys**:
 
-Amarsia inference includes free credits and does not require a separate model
-provider key:
+**Option A — Amarsia AI Gateway (Recommended, includes free credits):**
 
 1. Sign up at [Amarsia](https://amarsia.com).
-2. Open **Projects**.
-3. Choose **Connect New Project**.
-4. Copy the generated project key into `.env`:
+2. Open **Projects** → **Connect New Project**.
+3. Copy the generated project key into `.env`:
 
-```env
+```dotenv
 AMARSIA_PROJECT_KEY=your_project_key
 ```
 
-This configuration also enables Orcha cloud session storage.
+**Option B — Your own model provider keys:**
 
-### Option 2: Your own provider key
+Leave `AMARSIA_PROJECT_KEY` empty and add the key matching the model configured in `orcha/assistant/index.json` and `orcha/researcher/index.json`:
 
-Leave `AMARSIA_PROJECT_KEY` empty and configure a provider supported by the
-agent model:
-
-```env
+```dotenv
 OPENAI_API_KEY=your_key
+# ANTHROPIC_API_KEY=
+# GOOGLE_API_KEY=
+# DEEPSEEK_API_KEY=
 ```
 
-The fallback provider registration is in `orcha/index.ts`.
-
-## Follow the agent lifecycle
-
-The main integration lives in `app/api/executions/route.ts`:
-
-1. Resolve the private browser identity.
-2. Convert uploaded attachment IDs into Orcha file content.
-3. Call `assistant.run(...)` for a new durable session.
-4. Call `assistant.resume(...)` for a follow-up turn.
-5. Stream snapshots and the final result as NDJSON.
-
-Each action is a folder under `orcha/assistant/actions`:
-
-```text
-actions/
-  calculateMetrics/
-    index.json
-    index.js
-```
-
-`index.json` describes the model-facing action and its schemas. `index.js`
-contains ordinary server-side JavaScript. Add another action folder and Orcha
-discovers it during compilation.
-
-## File input
-
-The composer uploads files to `POST /api/uploads`. Files are validated and
-stored under `.orcha/uploads/<visitorId>/`, then supplied to Orcha as local
-file content:
-
-```ts
-{
-  type: "file",
-  filePath,
-  mimeType
-}
-```
-
-Uploaded bytes are local runtime data. Mount persistent storage or replace the
-upload layer with object storage when deploying to an ephemeral platform.
-
-## Customize the template
-
-- Branding, accent color, upload limits, and suggestions: `config/app.ts`
-- Provider, model, and token limit: `orcha/assistant/index.json`
-- Stable agent behavior: `orcha/assistant/instructions.md`
-- Actions: `orcha/assistant/actions`
-- Main workspace: `components/agent-workspace.tsx`
-- Visual system: `app/globals.css`
-
-The system instructions intentionally do not force Markdown. Plain model text
-renders as plain text; headings, lists, links, code, blockquotes, and tables
-become rich UI only when the model naturally returns Markdown.
-
-## API surface
-
-- `POST /api/executions` — start or continue a run and stream NDJSON
-- `POST /api/uploads` — validate and store an attachment
-- `GET /api/sessions` — list runs owned by the current browser
-- `GET /api/sessions/:id` — load projected history and execution events
-- `GET /api/sessions/:id/history` — load paginated projected history
-- `GET /api/sessions/:id/events` — load stable paginated events
-- `POST /api/sessions/:id/tools/:callId` — resolve a pending client action
-
-Every session read and mutation verifies an opaque HttpOnly browser identity.
-Provider credentials are never sent to the browser.
-
-## Orcha resources
-
-- [OrchaJS on GitHub](https://github.com/Amarsia/orcha)
-- [OrchaJS on npm](https://www.npmjs.com/package/orchajs)
-
-Useful development commands:
+### 3. Start the workspace
 
 ```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+> Note: `npm run dev` runs `orchajs build` at startup. Restart `npm run dev` whenever you edit files under `orcha/`.
+
+---
+
+## Standalone Agent Playground & Tests
+
+Test and iterate on the compiled agents directly via Orcha CLI:
+
+```bash
+# Open the built-in Orcha Playground UI
 npm run agent:playground
+
+# Run declarative tests in orcha/assistant/tests/
 npm run agent:test
 ```
+
+---
+
+## Customization Guide
+
+- **Branding, accent, upload limits, and starter prompts**: `config/app.ts`
+- **Primary agent model & behavior**: `orcha/assistant/index.json` and `orcha/assistant/instructions.md`
+- **Subagent model & behavior**: `orcha/researcher/index.json` and `orcha/researcher/instructions.md`
+- **Local & client actions**: `orcha/assistant/actions/*` (add a folder with `index.json` and `index.js` for OrchaJS to auto-discover it)
+- **Workspace UI & custom client-action cards**: `components/agent-workspace.tsx`
+- **Theme tokens & styles**: `app/globals.css`
+
+---
+
+## API Endpoints
+
+| Route | Method | Description |
+| --- | --- | --- |
+| `/api/executions` | `POST` | Starts or resumes an agent run and streams NDJSON snapshots. |
+| `/api/uploads` | `POST` | Validates and stores a visitor-scoped attachment under `.orcha/uploads/<visitorId>/`. |
+| `/api/uploads/[fileId]` | `GET` | Serves a visitor-owned attachment for image previews and downloads. |
+| `/api/sessions` | `GET` | Lists durable sessions owned by the current browser visitor. |
+| `/api/sessions/[sessionId]` | `GET` | Loads projected session details, history, and canonical events. |
+| `/api/sessions/[sessionId]/history` | `GET` | Loads paginated projected history. |
+| `/api/sessions/[sessionId]/events` | `GET` | Loads stable paginated canonical events. |
+| `/api/sessions/[sessionId]/subagents/[childSessionId]` | `GET` | Loads canonical events for a child session owned by `sessionId`. |
+| `/api/sessions/[sessionId]/tools/[callId]` | `POST` | Submits a pending client-action result and streams the resumed run. |
+
+---
+
+## Project Structure
+
+```text
+app/
+  api/                  Execution stream, sessions, subagents, client-action tools, and uploads
+  globals.css           Light/dark theme tokens, timeline, subagent breadcrumb, and media styles
+  layout.tsx            Fonts, metadata, and theme provider
+components/
+  agent-workspace.tsx   Sidebar, timeline, subagent inspector, approval card, and composer
+  rich-markdown.tsx     GitHub-flavored Markdown renderer
+  theme-provider.tsx    next-themes wrapper
+  theme-selector.tsx    Light / dark / system switcher
+config/
+  app.ts                Branding, accent color, upload limits, and starter prompts
+lib/
+  orcha-server.ts       Server-only Orcha runtime accessor
+  types.ts              Shared session, timeline, and streaming types
+  uploads.ts            Visitor-scoped file storage helpers
+  visitor.ts            HttpOnly visitor identity cookie helper
+orcha/
+  index.ts              Orcha registry (Amarsia AI Gateway / direct providers + subagents)
+  assistant/            Atlas agent (instructions, actions, tests)
+  researcher/           Private subagent delegated by Atlas
+```
+
+---
 
 ## License
 

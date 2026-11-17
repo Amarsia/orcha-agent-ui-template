@@ -1,8 +1,8 @@
 node_modules
 .next
-.orcha
+.orcha/
 .env
 .env.local
 *.log
+*.tsbuildinfo
 .DS_Store
-.orcha/
