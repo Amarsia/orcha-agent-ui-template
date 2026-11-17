@@ -25,8 +25,12 @@ export function textContent(content: unknown): string {
   if (!Array.isArray(content)) return "";
   return content
     .flatMap((part) =>
-      typeof part === "object" && part && "type" in part && part.type === "text" &&
-      "text" in part && typeof part.text === "string"
+      typeof part === "object" &&
+      part &&
+      "type" in part &&
+      part.type === "text" &&
+      "text" in part &&
+      typeof part.text === "string"
         ? [part.text]
         : [],
     )

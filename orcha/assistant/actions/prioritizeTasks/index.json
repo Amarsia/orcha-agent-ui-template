@@ -1,0 +1,49 @@
+{
+  "name": "prioritize_tasks",
+  "description": "Rank tasks using impact, urgency, and effort scores when prioritization needs to be explicit and reproducible.",
+  "execution": "local",
+  "sideEffect": false,
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "tasks": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 30,
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string", "maxLength": 160 },
+            "impact": { "type": "number", "minimum": 1, "maximum": 5 },
+            "urgency": { "type": "number", "minimum": 1, "maximum": 5 },
+            "effort": { "type": "number", "minimum": 1, "maximum": 5 }
+          },
+          "required": ["title", "impact", "urgency", "effort"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["tasks"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "ranked": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "rank": { "type": "number" },
+            "title": { "type": "string" },
+            "score": { "type": "number" }
+          },
+          "required": ["rank", "title", "score"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["ranked"],
+    "additionalProperties": false
+  }
+}

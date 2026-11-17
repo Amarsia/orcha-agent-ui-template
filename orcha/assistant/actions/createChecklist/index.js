@@ -1,6 +1,4 @@
-type ChecklistInput = { title: string; items: string[] };
-
-export default async function createChecklist(parameters: ChecklistInput) {
+export default async function createChecklist(parameters) {
   const title = parameters.title.trim().slice(0, 120);
   const items = parameters.items
     .map((label) => label.trim().slice(0, 240))

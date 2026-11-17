@@ -1,0 +1,30 @@
+{
+  "name": "Requests approval before finalizing",
+  "description": "Uses the client request_approval action when the user asks to review a recommendation.",
+  "input": {
+    "content": "Please ask me to approve this recommendation: ship the landing page tomorrow after design review."
+  },
+  "actions": {
+    "request_approval": {
+      "responses": [
+        {
+          "output": {
+            "approved": true,
+            "note": "Approved after design review."
+          }
+        }
+      ]
+    }
+  },
+  "expect": {
+    "status": "completed",
+    "text": {
+      "contains": ["approved"]
+    },
+    "actions": [
+      {
+        "name": "request_approval"
+      }
+    ]
+  }
+}

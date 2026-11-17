@@ -1,16 +1,47 @@
 import { orcha } from "orchajs";
 
-orcha.init({
-  amarsia: process.env.AMARSIA_PROJECT_KEY
-    ? { key: process.env.AMARSIA_PROJECT_KEY, endpoint: process.env.AMARSIA_API_URL }
-    : undefined,
-  providers: { openai: process.env.OPENAI_API_KEY ?? "" },
-  agents: { assistant: "./assistant" },
-  actions: { runtime: "native" },
-  storage: {
-    strategy: "node-jsonl",
-    directory: process.env.ORCHA_SESSION_DIRECTORY ?? ".orcha/sessions",
-  },
-});
+if (!orcha.isInitialized()) {
+  const amarsiaKey = process.env.AMARSIA_PROJECT_KEY?.trim();
+
+  orcha.init(
+    amarsiaKey
+      ? {
+          amarsia: {
+            key: amarsiaKey,
+            endpoint: process.env.AMARSIA_API_URL,
+            inference: true,
+          },
+          storage: {
+            strategy: "cloud",
+          },
+          actions: { runtime: "native" },
+          agents: {
+            assistant: {
+              path: "./assistant",
+              subagents: {
+                researcher: "./researcher",
+              },
+            },
+          },
+        }
+      : {
+          providers: {
+            openai: process.env.OPENAI_API_KEY ?? "",
+            anthropic: process.env.ANTHROPIC_API_KEY ?? "",
+            googlegenai: process.env.GOOGLE_API_KEY ?? "",
+            deepseek: process.env.DEEPSEEK_API_KEY ?? "",
+          },
+          actions: { runtime: "native" },
+          agents: {
+            assistant: {
+              path: "./assistant",
+              subagents: {
+                researcher: "./researcher",
+              },
+            },
+          },
+        },
+  );
+}
 
 export { orcha };

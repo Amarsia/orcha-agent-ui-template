@@ -21,9 +21,22 @@
     "type": "object",
     "properties": {
       "title": { "type": "string" },
-      "items": { "type": "array", "items": { "type": "object" } },
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "position": { "type": "number" },
+            "label": { "type": "string" },
+            "completed": { "type": "boolean" }
+          },
+          "required": ["position", "label", "completed"],
+          "additionalProperties": false
+        }
+      },
       "count": { "type": "number" }
     },
-    "required": ["title", "items", "count"]
+    "required": ["title", "items", "count"],
+    "additionalProperties": false
   }
 }

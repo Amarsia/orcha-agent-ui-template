@@ -18,6 +18,7 @@
       "approved": { "type": "boolean" },
       "note": { "type": "string" }
     },
-    "required": ["approved"]
+    "required": ["approved"],
+    "additionalProperties": false
   }
 }

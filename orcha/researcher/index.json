@@ -1,0 +1,9 @@
+{
+  "name": "Researcher",
+  "description": "Investigates technical options, trade-offs, edge cases, and structured findings for the main planning agent.",
+  "provider": "openai",
+  "model": "gpt-5-mini",
+  "region": "provider_managed",
+  "maxTokens": 4096,
+  "outputType": "text"
+}

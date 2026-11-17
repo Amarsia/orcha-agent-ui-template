@@ -2,18 +2,40 @@ export type AppConfig = {
   name: string;
   description: string;
   agentLabel: string;
-  defaultPrompt: string;
+  icon: string;
+  accent: string;
+  theme: "light" | "dark" | "system";
+  poweredBy: string;
+  allowFileUploads: boolean;
+  maxFileSizeMb: number;
+  maxFilesPerRun: number;
   suggestedPrompts: readonly { title: string; prompt: string }[];
 };
 
 export const appConfig = {
   name: "Atlas",
-  description: "A transparent workspace for durable AI agent executions.",
-  agentLabel: "Orcha agent",
-  defaultPrompt: "Help me plan a focused work session.",
+  description: "A compact workspace for building, running, and inspecting durable Orcha agents.",
+  agentLabel: "Orcha Agent",
+  icon: "/agent-mark.svg",
+  accent: "#D97757",
+  theme: "system",
+  poweredBy: "Powered by OrchaJS",
+  allowFileUploads: true,
+  maxFileSizeMb: 25,
+  maxFilesPerRun: 5,
   suggestedPrompts: [
-    { title: "Plan a launch", prompt: "Create a concise launch checklist and use the checklist action." },
-    { title: "Review a decision", prompt: "Help me evaluate a decision, then ask for my approval before finalizing." },
-    { title: "Break down work", prompt: "Turn my goal into five concrete next steps." },
+    {
+      title: "Launch checklist",
+      prompt: "Create a concise launch checklist and use the checklist action.",
+    },
+    {
+      title: "Research & risk plan",
+      prompt:
+        "Delegate to the researcher subagent to compare canary vs blue-green deployments, then build a risk register.",
+    },
+    {
+      title: "Approval gate",
+      prompt: "Evaluate a production deployment plan, then request my approval before finalizing.",
+    },
   ],
 } as const satisfies AppConfig;

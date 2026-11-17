@@ -13,7 +13,7 @@ export async function GET(request: Request, context: Context) {
     const url = new URL(request.url);
     const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
     const throughSequence = Number(url.searchParams.get("throughSequence")) || undefined;
-    const result = await assistant().events(sessionId, { page, pageSize: 200, throughSequence });
+    const result = await assistant().events(sessionId, { page, pageSize: 100, throughSequence });
     return Response.json(result, { headers: responseHeaders(visitor.cookie) });
   } catch (error) {
     return apiError(error, "Events could not be loaded.");
