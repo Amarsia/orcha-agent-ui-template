@@ -11,6 +11,15 @@ A full-stack Next.js workspace for building, running, and inspecting durable AI 
 
 ---
 
+## Why This Template
+
+- **No separate backend required** — Everything runs inside this single Next.js app. OrchaJS handles model calls, tool execution, subagent delegation, pause/resume approvals, and durable session history directly inside Next.js Route Handlers—no separate Python/Node agent server, queue, or database setup needed.
+- **`npm run dev` and go** — Install dependencies, drop an `AMARSIA_PROJECT_KEY` (or your own provider key) into `.env`, and run `npm run dev` for a complete, working agent workspace in under a minute.
+- **Filesystem-convention agents** — Prompts, actions, subagents, skills, and tests live under `orcha/`. Swap providers/models or add new tools without touching the UI or streaming plumbing.
+- **Production-ready from day one** — Ships with HttpOnly visitor isolation, local/cloud session persistence, validated JSON Schema actions, and a Dockerfile for self-hosting.
+
+---
+
 ## What's Included
 
 - **On-demand agent workspace** — Streaming NDJSON runs, collapsible sidebar, durable per-browser session history, and deep-linked sessions (`/?session=...`).
